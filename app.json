@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "sentinel",
-    "slug": "sentinel",
+    "name": "GigKavach",
+    "slug": "GigKavach",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,7 +19,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.shristikarai800.sentinel",
+      "package": "com.shristikarai800.GigKavach",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

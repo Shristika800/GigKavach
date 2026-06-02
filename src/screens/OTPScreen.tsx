@@ -143,7 +143,7 @@ navigation.replace(
 
           <Image
             source={require(
-              "../assets/sentinel-logo.jpg"
+              "../assets/gigkavach_logo.png"
             )}
             style={styles.logo}
             resizeMode="contain"

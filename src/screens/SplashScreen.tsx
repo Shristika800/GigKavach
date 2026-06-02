@@ -143,7 +143,7 @@ export default function SplashScreen({
 
             <Image
               source={require(
-                "../assets/sentinel-logo.jpg"
+                "../assets/gigkavach_logo.png"
               )}
               style={styles.logoImage}
               resizeMode="contain"
@@ -156,16 +156,17 @@ export default function SplashScreen({
         {/* APP NAME */}
 
         <Text style={styles.appName}>
-          SENTINEL
-        </Text>
+GigKavach
+</Text>
 
         {/* TAGLINE */}
 
         <Text style={styles.tagline}>
-          PROTECTING GIG WORKERS
-          {"\n"}
-          REAL TIME
-        </Text>
+          YOUR PROTECTION IS
+           </Text>
+          <Text style={styles.taglineAccent}>
+          OUR PRIORITY.
+       </Text>
 
       </Animated.View>
 
@@ -220,16 +221,6 @@ const styles =
 
       marginBottom: 38,
 
-      shadowColor: "#0f4c81",
-      shadowOpacity: 0.55,
-      shadowRadius: 32,
-
-      shadowOffset: {
-        width: 0,
-        height: 0,
-      },
-
-      elevation: 22,
     },
 
     innerRing: {
@@ -288,6 +279,18 @@ const styles =
       fontWeight: "500",
     },
 
+    taglineAccent: { fontSize: 14,
+      color: "#ff7818",
+
+      letterSpacing: 5,
+
+      textAlign: "center",
+
+      lineHeight: 28,
+
+      fontWeight: "500", 
+    },
+    
     footer: {
       position: "absolute",
       bottom: 52,

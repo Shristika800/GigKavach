@@ -73,7 +73,7 @@ const fetchUser = async () => {
     const startTracking = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission Required", "Location access is needed for Sentinel tracking.");
+        Alert.alert("Permission Required", "Location access is needed for GigKavach tracking.");
         return;
       }
 
@@ -404,7 +404,7 @@ const openEmergencyContacts = () => {
     </TouchableOpacity>
 
     <Text style={styles.notificationTitle}>
-      Sentinel Alerts
+      GigKavach Alerts
     </Text>
            <View style={styles.alertItem}>
   <Text style={styles.alertStatus}>

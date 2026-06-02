@@ -106,7 +106,7 @@ export default function PermissionScreen({
 
         Alert.alert(
           "Location Required",
-          "Sentinel requires location access for passive worker safety monitoring."
+          "GigKavach requires location access for passive worker safety monitoring."
         );
       }
 
@@ -248,7 +248,7 @@ export default function PermissionScreen({
         </Text>
 
         <Text style={styles.subtitle}>
-          Sentinel uses passive
+          GigKavach uses passive
           safety systems to help
           protect workers during
           active shifts

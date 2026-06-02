@@ -62,7 +62,7 @@ export default function RegisterScreen({
 
             <Image
               source={require(
-                "../assets/sentinel-logo.jpg"
+                "../assets/gigkavach_logo.png"
               )}
               style={styles.logoImage}
               resizeMode="contain"
@@ -79,7 +79,7 @@ export default function RegisterScreen({
         </Text>
 
         <Text style={styles.subtitle}>
-          Join Sentinel and
+          Join GigKavach and
           activate worker safety
         </Text>
 
@@ -248,16 +248,6 @@ const styles =
 
       marginBottom: 34,
 
-      shadowColor: "#0f4c81",
-      shadowOpacity: 0.5,
-      shadowRadius: 30,
-
-      shadowOffset: {
-        width: 0,
-        height: 0,
-      },
-
-      elevation: 20,
     },
 
     innerRing: {

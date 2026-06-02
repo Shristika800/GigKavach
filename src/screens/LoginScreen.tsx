@@ -57,7 +57,7 @@ export default function LoginScreen({
 
             <Image
               source={require(
-                "../assets/sentinel-logo.jpg"
+                "../assets/gigkavach_logo.png"
               )}
               style={styles.logoImage}
               resizeMode="contain"
@@ -75,7 +75,7 @@ export default function LoginScreen({
 
         <Text style={styles.subtitle}>
           Secure access for
-          Sentinel workers
+          GigKavach workers
         </Text>
 
         {/* PHONE INPUT */}
@@ -161,7 +161,7 @@ onChangeText={(text) => {
         <View style={styles.bottomRow}>
 
           <Text style={styles.bottomText}>
-            New to Sentinel?
+            New to GigKavach?
           </Text>
 
           <TouchableOpacity
@@ -228,16 +228,6 @@ const styles =
 
       marginBottom: 34,
 
-      shadowColor: "#0f4c81",
-      shadowOpacity: 0.5,
-      shadowRadius: 30,
-
-      shadowOffset: {
-        width: 0,
-        height: 0,
-      },
-
-      elevation: 20,
     },
 
     innerRing: {
