@@ -1,14 +1,8 @@
-import React, {
-  useRef,
-  useState,
-} from "react";
+import React, {useRef,useState,} from "react";
 
 import { View,Text, StyleSheet, StatusBar, TouchableOpacity, TextInput,  KeyboardAvoidingView, Platform,Image} from "react-native";
 
-import { COLORS }
-from "../constants/colors";
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { COLORS }from "../constants/colors";
 
 import { supabase } from "../lib/supabase";
 
@@ -18,8 +12,9 @@ export default function OTPScreen({
 }: any) {
 
   const {
+    email,
     fromScreen,
-    phone,
+    fullName,
   } = route.params;
 
   const [otp, setOtp] =
@@ -32,20 +27,19 @@ export default function OTPScreen({
       "",
     ]);
 
-  const inputs =
-  useRef<TextInput[]>([]);
+const [loading, setLoading] = useState(false);
+
+  const inputs = useRef<TextInput[]>([]);
 
   const handleChange =
-    (
+ (
       value: string,
       index: number
     ) => {
 
-      const updatedOtp =
-        [...otp];
+      const updatedOtp = [...otp];
 
-      updatedOtp[index] =
-        value;
+      updatedOtp[index] =  value;
 
       setOtp(updatedOtp);
 
@@ -66,52 +60,117 @@ export default function OTPScreen({
         digit !== ""
     );
 
-  const handleVerify =
-  async() => {
+  const handleVerify = async () => {
+    if (loading) return;
 
-    const enteredOtp =
-      otp.join("");
+    setLoading(true);
 
-    if (
-      enteredOtp !== "245780"
-    ) {
+    const enteredOtp = otp.join("");
 
-      alert("Invalid OTP");
+    const { data: authData, error } = await supabase.auth.verifyOtp({
+      email,
+      token: enteredOtp,
+      type: "email",
+    });
+
+    if (error) {
+      setLoading(false);
+      alert(error.message);
+      return;
+    }
+
+    const userId = authData.user?.id;
+
+    if (!userId) {
+      setLoading(false);
+      alert("Something went wrong. Please try again.");
+      return;
+    }
+
+    /* ---------------- REGISTER FLOW ---------------- */
+
+    if (fromScreen === "Register") {
+
+      const { error: insertError } = await supabase
+        .from("users")
+        .upsert({
+          uuid: userId,
+          full_name: fullName,
+          email,
+        });
+
+      if (insertError) {
+        setLoading(false);
+        alert(insertError.message);
+        return;
+      }
+
+      setLoading(false);
+
+      navigation.replace("WorkerDetails", {
+        userId,
+        email,
+        fullName,
+      });
 
       return;
     }
 
-    if (
-      fromScreen ===
-      "Login"
-    ) {
+    /* ---------------- LOGIN FLOW ---------------- */
 
-    await AsyncStorage.setItem(
-  "userPhone",
-  phone
-);
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("*")
+      .eq("uuid", userId)
+      .maybeSingle();
 
-navigation.replace(
-  "Dashboard",
-  {
-    phone,
-  }
-);
-
-    } else {
-
-      navigation.replace(
-        "Permission",
-        {
-          phone,
-          fullName: route.params?.fullName,
-        }
-      );
-
-     
-
+    if (!userRow) {
+      setLoading(false);
+      navigation.replace("WorkerDetails", {
+        userId,
+        email,
+      });
+      return;
     }
-  };  
+
+    const { data: workerRow } = await supabase
+      .from("workers")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!workerRow) {
+      setLoading(false);
+      navigation.replace("WorkerDetails", {
+        userId,
+        email,
+        fullName: userRow.full_name,
+      });
+      return;
+    }
+
+    const { data: emergencyRow } = await supabase
+      .from("emergency_contacts")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!emergencyRow) {
+      setLoading(false);
+      navigation.replace("EmergencyContact", {
+        userId,
+      });
+      return;
+    }
+
+    setLoading(false);
+
+    navigation.replace("Dashboard", {
+      user: userRow,
+      worker: workerRow,
+      emergency: emergencyRow,
+    });
+  };
 
   return (
 
@@ -153,14 +212,9 @@ navigation.replace(
 
         {/* TITLE */}
 
-        <Text style={styles.title}>
-          Verify OTP
-        </Text>
+        <Text style={styles.title}>Verify OTP </Text>
 
-        <Text style={styles.subtitle}>
-          Enter the 6 digit code
-          sent to +91 {phone}
-        </Text>
+        <Text style={styles.subtitle}>Enter the 6 digit code sent to {email} </Text>
 
         {/* OTP BOXES */}
 
@@ -175,17 +229,10 @@ navigation.replace(
               <TextInput
                 key={index}
                 ref={(ref) => {
-  if (ref) {
-    inputs.current[index] = ref;
-  }
-}}
-                onChangeText={(value) => {
+  if (ref) { inputs.current[index] = ref;}
+}} onChangeText={(value) => {
 
-  const cleaned =
-    value.replace(
-      /[^0-9]/g,
-      ""
-    );
+  const cleaned = value.replace( /[^0-9]/g, "");
 
   handleChange(
     cleaned,
@@ -207,7 +254,7 @@ navigation.replace(
 
         <TouchableOpacity
           activeOpacity={0.9}
-          disabled={!isComplete}
+          disabled={!isComplete || loading}
           style={[
             styles.button,
 
@@ -221,24 +268,33 @@ navigation.replace(
         >
 
           <Text style={styles.buttonText}>
-            Verify OTP
+            {loading ? "Verifying..." : "Verify OTP"}
           </Text>
 
         </TouchableOpacity>
 
         {/* RESEND */}
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-        >
+    <TouchableOpacity
+  activeOpacity={0.8}
+  onPress={async () => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+      },
+    });
 
-          <Text style={styles.resend}>
-            Resend OTP
-          </Text>
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
-        </TouchableOpacity>
-
-      </View>
+    alert("OTP sent.");
+  }}
+>
+  <Text style={styles.resend}> Resend OTP </Text>
+</TouchableOpacity> </View>
 
     </KeyboardAvoidingView>
   );

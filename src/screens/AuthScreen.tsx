@@ -1,39 +1,38 @@
-import React, {
-  useState,
-} from "react";
+import React, {useState, useEffect,} from "react";
 
 import {Alert, View, Text,  StyleSheet,StatusBar, TextInput,TouchableOpacity, KeyboardAvoidingView, Platform,Image} from "react-native";
 
-import { COLORS }
-from "../constants/colors";
+import { COLORS } from "../constants/colors";
 
-import { supabase }
-from "../lib/supabase";
+import { supabase } from "../lib/supabase";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function LoginScreen({
-  navigation,
-}: any) {
+export default function LoginScreen({ navigation,}: any) {
 
-  const [phone, setPhone] =
-    useState("");
 
-    const isIndianNumber =
-  /^[6-9]\d{9}$/.test(phone);
+ useEffect(() => {async function testConnection() {
+    console.log(
+      "URL:", process.env.EXPO_PUBLIC_SUPABASE_URL);
 
- const isValidPhone =
-  isIndianNumber;
+    const { data, error } = await supabase.auth.getSession();
+
+    console.log("Session:", data);
+    console.log("Error:", error);
+  }
+
+  testConnection();
+}, []);
+
+const [email, setEmail] = useState("");
+
+const isValidEmail =  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   return (
 
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={
-        Platform.OS === "ios"
-          ? "padding"
-          : undefined
-      }
+      behavior={ Platform.OS === "ios" ? "padding": undefined}
     >
 
       <StatusBar
@@ -56,11 +55,8 @@ export default function LoginScreen({
           <View style={styles.innerRing}>
 
             <Image
-              source={require(
-                "../assets/gigkavach_logo.png"
-              )}
-              style={styles.logoImage}
-              resizeMode="contain"
+              source={require( "../assets/gigkavach_logo.png")}
+              style={styles.logoImage}  resizeMode="contain"
             />
 
           </View>
@@ -69,40 +65,24 @@ export default function LoginScreen({
 
         {/* TITLE */}
 
-        <Text style={styles.title}>
-          Welcome Back
-        </Text>
+        <Text style={styles.title}> Welcome to GigKavach </Text>
 
-        <Text style={styles.subtitle}>
-          Secure access for
-          GigKavach workers
-        </Text>
+        <Text style={styles.subtitle}> Secure access for GigKavach workers</Text>
 
         {/* PHONE INPUT */}
 
         <View style={styles.inputWrapper}>
 
-          <Text style={styles.countryCode}>
-            +91
-          </Text>
-
-          <TextInput
-            value={phone}
-onChangeText={(text) => {
-
-  const cleaned =
-    text.replace(
-      /[^0-9]/g,
-      ""
-    );
-
-  setPhone(cleaned);
-}}            placeholder="Enter mobile number"
-            placeholderTextColor="#5B6B81"
-            keyboardType="phone-pad"
-            maxLength={10}
-            style={styles.input}
-          />
+        <TextInput
+       value={email}
+       onChangeText={setEmail}
+       placeholder="Enter your email"
+       placeholderTextColor="#5B6B81"
+       keyboardType="email-address"
+       autoCapitalize="none"
+       autoCorrect={false}
+       style={styles.input}
+        />
 
         </View>
 
@@ -110,49 +90,40 @@ onChangeText={(text) => {
 
         <TouchableOpacity
           activeOpacity={0.9}
-          disabled={!isValidPhone}
+          disabled={!isValidEmail}
           style={[
             styles.button,
 
-            !isValidPhone && {
+            !isValidEmail && {
               opacity: 0.45,
             },
           ]}
          onPress={async () => {
 
-  const {
-    data,
-  } = await supabase
-    .from("users")
-    .select("*")
-    .eq("phone", phone)
-    .single();
+try { const { error } = await supabase.auth.signInWithOtp({
+  email,
+  options: {shouldCreateUser: true,
+    emailRedirectTo: undefined,
+  },
+});
 
-  if (!data) {
-
-    Alert.alert(
-      "User Not Found",
-      "Please register first."
-    );
-
+  if (error) { Alert.alert("Error", error.message);
     return;
   }
 
-  navigation.navigate(
-    "OTP",
-    {
-      fromScreen:
-        "Login",
-
-      phone,
-    }
+  Alert.alert(
+    "Check your email",
+    "We've sent you a verification code."
   );
+
+  navigation.navigate("OTP", { email,
+  });
+} catch (err) {  Alert.alert("Error", "Something went wrong.");
+}
 }}
         >
 
-          <Text style={styles.buttonText}>
-            Continue
-          </Text>
+          <Text style={styles.buttonText}>  Continue </Text>
 
         </TouchableOpacity>
 
@@ -160,9 +131,7 @@ onChangeText={(text) => {
 
         <View style={styles.bottomRow}>
 
-          <Text style={styles.bottomText}>
-            New to GigKavach?
-          </Text>
+          <Text style={styles.bottomText}> New to GigKavach?  </Text>
 
           <TouchableOpacity
             activeOpacity={0.8}
@@ -173,9 +142,7 @@ onChangeText={(text) => {
             }
           >
 
-            <Text style={styles.link}>
-              Register
-            </Text>
+            <Text style={styles.link}> Register </Text>
 
           </TouchableOpacity>
 
@@ -187,8 +154,7 @@ onChangeText={(text) => {
   );
 }
 
-const styles =
-  StyleSheet.create({
+const styles = StyleSheet.create({
 
     container: {
       flex: 1,
@@ -255,9 +221,9 @@ const styles =
 
     title: {
       color: "#FFFFFF",
-      fontSize: 36,
+      fontSize: 24,
       fontWeight: "800",
-
+marginLeft: 35,
       marginBottom: 10,
 
       letterSpacing: 0.5,
@@ -265,7 +231,7 @@ const styles =
 
     subtitle: {
       color: "#7FA9D9",
-      fontSize: 15,
+      fontSize: 10,
 
       textAlign: "center",
 

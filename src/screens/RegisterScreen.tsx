@@ -1,49 +1,32 @@
-import React, {
-  useState,
-} from "react";
+import React, { useState,} from "react";
 
 import { View, Text, StyleSheet, StatusBar,  TextInput,  TouchableOpacity, KeyboardAvoidingView, Platform, Image, Alert} from "react-native";
 
-import { COLORS }
-from "../constants/colors";
+import { COLORS }from "../constants/colors";
 
 
-import { supabase }
-from "../lib/supabase";
+import { supabase } from "../lib/supabase";
 
-export default function RegisterScreen({
-  navigation,
-}: any) {
+export default function RegisterScreen({ navigation,}: any) {
 
-  const [name, setName] =
-    useState("");
+  const [name, setName] =useState("");
 
-  const [phone, setPhone] =
-    useState("");
+  const [email, setEmail] = useState("");
 
-  const isIndianNumber =
-    /^[6-9]\d{9}$/
-      .test(phone);
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ .test(email);
 
-  const isValid =
-    name.trim().length > 2
+  const isValid = name.trim().length > 2
     &&
-    isIndianNumber;
+    isValidEmail;
 
   return (
 
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={
-        Platform.OS === "ios"
-          ? "padding"
+    <KeyboardAvoidingView style={styles.container} behavior={ Platform.OS === "ios" ? "padding"
           : undefined
       }
     >
 
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="#020617"
+      <StatusBar barStyle="light-content" backgroundColor="#020617"
       />
 
       {/* TOP GLOW */}
@@ -60,10 +43,7 @@ export default function RegisterScreen({
 
           <View style={styles.innerRing}>
 
-            <Image
-              source={require(
-                "../assets/gigkavach_logo.png"
-              )}
+            <Image source={require( "../assets/gigkavach_logo.png" )}
               style={styles.logoImage}
               resizeMode="contain"
             />
@@ -74,14 +54,9 @@ export default function RegisterScreen({
 
         {/* TITLE */}
 
-        <Text style={styles.title}>
-          Create Account
-        </Text>
+        <Text style={styles.title}> Create Account </Text>
 
-        <Text style={styles.subtitle}>
-          Join GigKavach and
-          activate worker safety
-        </Text>
+        <Text style={styles.subtitle}> Join GigKavach and activate worker safety</Text>
 
         {/* FULL NAME */}
 
@@ -97,33 +72,19 @@ export default function RegisterScreen({
 
         </View>
 
-        {/* PHONE */}
+        {/* EMAIL */}
 
         <View style={styles.inputWrapper}>
-
-          <Text style={styles.countryCode}>
-            +91
-          </Text>
-
           <TextInput
-            value={phone}
-            onChangeText={(text) => {
-
-              const cleaned =
-                text.replace(
-                  /[^0-9]/g,
-                  ""
-                );
-
-              setPhone(cleaned);
-            }}
-            placeholder="Mobile Number"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
             placeholderTextColor="#5B6B81"
-            keyboardType="phone-pad"
-            maxLength={10}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
             style={styles.input}
           />
-
         </View>
 
         {/* BUTTON */}
@@ -143,9 +104,9 @@ export default function RegisterScreen({
       data,
     } = await supabase
       .from("users")
-      .select("*")
-      .eq("phone", phone)
-      .single();
+      .select("uuid")
+      .eq("email", email)
+      .maybeSingle();
 
     if (data) {
 
@@ -157,24 +118,24 @@ export default function RegisterScreen({
       return;
     }
 
-    navigation.navigate(
-      "OTP",
-      {
-        fromScreen:
-          "Register",
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+      },
+    });
 
-        phone,
+    if (error) {
+      Alert.alert("Error", error.message);
+      return;
+    }
 
-        fullName:
-          name,
-      }
+    navigation.navigate( "OTP", {fromScreen: "Register", email, fullName: name, }
     );
   }}
 >
 
-          <Text style={styles.buttonText}>
-            Create Account
-          </Text>
+          <Text style={styles.buttonText}>Create Account </Text>
 
         </TouchableOpacity>
 
@@ -182,9 +143,7 @@ export default function RegisterScreen({
 
         <View style={styles.bottomRow}>
 
-          <Text style={styles.bottomText}>
-            Already registered?
-          </Text>
+          <Text style={styles.bottomText}> Already registered?</Text>
 
           <TouchableOpacity
             activeOpacity={0.8}
@@ -193,9 +152,7 @@ export default function RegisterScreen({
             }
           >
 
-            <Text style={styles.link}>
-              Login
-            </Text>
+            <Text style={styles.link}> Login</Text>
 
           </TouchableOpacity>
 
@@ -207,8 +164,7 @@ export default function RegisterScreen({
   );
 }
 
-const styles =
-  StyleSheet.create({
+const styles = StyleSheet.create({
 
     container: {
       flex: 1,

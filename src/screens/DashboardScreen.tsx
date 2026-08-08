@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View, Text, StyleSheet, StatusBar, TouchableOpacity,
-  ScrollView, Alert, TextInput, Modal, Image, Linking
+import {  View, Text, StyleSheet, StatusBar, TouchableOpacity, ScrollView, Alert, TextInput, Modal, Image, Linking
 } from "react-native";
 import { supabase } from "../lib/supabase";
 import * as ImagePicker from "expo-image-picker";
@@ -9,12 +7,10 @@ import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { COLORS } from "../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
+import MapView, { Marker } from "react-native-maps";
 
-export default function DashboardScreen({
-  route,
-  navigation,
-}: any) {
-  const { phone } = route.params || {};
+export default function DashboardScreen({ route, navigation,}: any) {
+const { phone } = route.params || {};
 
 
 
@@ -30,56 +26,42 @@ export default function DashboardScreen({
   const [description, setDescription] = useState("");
   const [incidentImage, setIncidentImage] = useState<any>(null);
   const [currentSpeed, setCurrentSpeed] = useState(0);
+  const [overspeed, setOverspeed] = useState(false);
 
   // fetch user from supabase
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  useEffect(() => { fetchUser(); }, []);
 
 const fetchUser = async () => {
 
   let savedPhone = phone;
 
-  if (!savedPhone) {
-    savedPhone =
-      await AsyncStorage.getItem(
-        "userPhone"
+  if (!savedPhone) { savedPhone =  await AsyncStorage.getItem(
+ "userPhone"
       );
   }
 
   if (!savedPhone) return;
 
-  const { data, error } =
-    await supabase
-      .from("users")
-      .select("*")
-      .eq("phone", savedPhone)
-      .single();
+  const { data, error } =await supabase.from("users").select("*").eq("phone", savedPhone).single();
 
   console.log("PHONE:", savedPhone);
   console.log("USER:", data);
 
-  if (!error && data) {
-    setUser(data);
-
-    console.log("PHONE:", phone);
+  if (!error && data) {setUser(data);
+console.log("PHONE:", phone);
   }
 };
 
   // continuous GPS tracking
-  useEffect(() => {
-    let subscription: any;
+  useEffect(() => { let subscription: any;
 
-    const startTracking = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission Required", "Location access is needed for GigKavach tracking.");
+    const startTracking = async () => {const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") { Alert.alert("Permission Required", "Location access is needed for GigKavach tracking.");
         return;
       }
 
       subscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.BestForNavigation,
+        { accuracy: Location.Accuracy.BestForNavigation,
           timeInterval: 5000,
           distanceInterval: 5,
         },
@@ -94,13 +76,9 @@ const fetchUser = async () => {
           console.log("LIVE SPEED:", roundedSpeed);
           console.log("LOCATION:", loc.coords);
 
-          if (roundedSpeed > 30) {
-            Alert.alert("High Speed Detected", "Please slow down.");
-          }
+        if (roundedSpeed > 50) {setOverspeed(true);} else {setOverspeed(false);}
 
-          if (roundedSpeed < 5) {
-            console.log("Low movement detected");
-          }
+         if (roundedSpeed < 5) { console.log("Low movement detected");}
         }
       );
     };
@@ -108,43 +86,34 @@ const fetchUser = async () => {
 
     startTracking();
 
-    return () => {
-      if (subscription) subscription.remove();
-    };
+    return () => {if (subscription) subscription.remove();};
   }, []);
 
   // get location when shift starts
-  useEffect(() => {
-    if (shiftActive) getLocation();
-  }, [shiftActive]);
+  useEffect(() => {if (shiftActive) getLocation();}, [shiftActive]);
 
   const getLocation = async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+    try {const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission Required", "Location access is required.");
         return;
       }
       const loc = await Location.getCurrentPositionAsync({});
       setLocation(loc.coords);
-    } catch {
-      Alert.alert("Location Error", "Unable to fetch live location.");
+    } catch {Alert.alert("Location Error", "Unable to fetch live location.");
     }
   };
 
-  const toggleShift = () => {
-    if (!shiftActive) {
+  const toggleShift = () => {if (!shiftActive) {
       setShiftActive(true);
       setAlerts(prev => [{ type: "Shift Started", time: new Date().toLocaleString() }, ...prev]);
-    } else {
-      setShiftActive(false);
+    } else {setShiftActive(false);
       setShowTracking(false);
       setAlerts(prev => [{ type: "Shift Ended", time: new Date().toLocaleString() }, ...prev]);
     }
   };
 
-  const handleSOS = () => {
-    setAlerts(prev => [{
+  const handleSOS = () => {setAlerts(prev => [{
       type: "SOS Triggered",
       time: new Date().toLocaleString(),
       latitude: location?.latitude,
@@ -154,51 +123,37 @@ const fetchUser = async () => {
   };
 
 
-  const openCamera = async () => {
-
-  const permission =
+  const openCamera = async () => {const permission =
     await ImagePicker.requestCameraPermissionsAsync();
 
-  if (
-    permission.status !== "granted"
-  ) {
-    return;
-  }
+  if (permission.status !== "granted"
+  ) {return;}
+  
 
-  const result =
-    await ImagePicker.launchCameraAsync({
-      mediaTypes:
+  const result =await ImagePicker.launchCameraAsync({
+      mediaTypes:ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+
+  if (!result.canceled) {setIncidentImage(result.assets[0]);
+  }
+};
+
+const openGallery = async () => {const result =
+    await ImagePicker.launchImageLibraryAsync({mediaTypes:
         ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
     });
 
-  if (!result.canceled) {
-    setIncidentImage(result.assets[0]);
+  if (!result.canceled) {setIncidentImage(result.assets[0]);
   }
 };
 
-const openGallery = async () => {
-
-  const result =
-    await ImagePicker.launchImageLibraryAsync({
-      mediaTypes:
-        ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    });
-
-  if (!result.canceled) {
-    setIncidentImage(result.assets[0]);
-  }
-};
-
-const logout = async () => {
-
-  await AsyncStorage.removeItem(
+const logout = async () => {await AsyncStorage.removeItem(
     "userPhone"
   );
 
-  navigation.reset({
-    index: 0,
+  navigation.reset({index: 0,
     routes: [
       {
         name: "Login",
@@ -209,9 +164,7 @@ const logout = async () => {
 };
 
 const uploadIncidentImage =
-  () => {
-
-    Alert.alert(
+() => {Alert.alert(
       "Upload Evidence",
 
       "Choose an option",
@@ -242,8 +195,7 @@ const uploadIncidentImage =
     );
   };
 
-  const submitIncident = () => {
-    if (!incidentType || !severity || !description) {
+  const submitIncident = () => {if (!incidentType || !severity || !description) {
       Alert.alert("Incomplete Report", "Please complete all fields.");
       return;
     }
@@ -263,24 +215,20 @@ const uploadIncidentImage =
     Alert.alert("Incident Submitted", "Incident has been securely logged.");
   };
 
-  const callPrimaryContact = () => {
-  Alert.alert(
+  const callPrimaryContact = () => {Alert.alert(
     "Coming Soon",
     "Primary contact calling will be added next."
   );
 };
 
-const viewContacts = () => {
-  navigation.navigate(
+const viewContacts = () => {navigation.navigate(
     "EmergencyContact"
   );
 };
 
 
 
-const openEmergencyContacts = () => {
-
-  Alert.alert(
+const openEmergencyContacts = () => {Alert.alert(
     "Emergency Contacts",
     "Choose an option",
     [
@@ -308,8 +256,7 @@ const openEmergencyContacts = () => {
 
 };
 
-  const openSafeRoutes = () => {
-    Linking.openURL("https://www.google.com/maps");
+  const openSafeRoutes = () => {Linking.openURL("https://www.google.com/maps");
   };
 
   const hour = new Date().getHours();
@@ -318,15 +265,18 @@ const openEmergencyContacts = () => {
   else if (hour < 17) greeting = "Good Afternoon";
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      showsVerticalScrollIndicator={false}
-    >
+    <ScrollView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#020617" />
       <View style={styles.topGlow} />
 
       <View style={styles.content}>
+        {overspeed && (
+  <View style={styles.warningBanner}>
+    <Text style={styles.warningText}>
+      ⚠ Overspeed Detected • Please Slow Down
+    </Text>
+  </View>
+)}
 
         {/* HEADER */}
         <View style={styles.header}>
@@ -349,8 +299,7 @@ const openEmergencyContacts = () => {
       alignItems: "center",
     }}
   >
-    <Text
-      style={{
+    <Text style={{
         color: "#FFFFFF",
         fontWeight: "700",
       }}
@@ -436,16 +385,14 @@ const openEmergencyContacts = () => {
   </Text>
 </View>
 
-<View
-  style={{
+<View style={{
     marginTop: 8,
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: "rgba(148,163,184,0.08)",
   }}
 >
-  <Text
-    style={{
+  <Text style={{
       color: "#8B93A7",
       fontSize: 13,
       textAlign: "center",
@@ -485,39 +432,50 @@ const openEmergencyContacts = () => {
         <View style={styles.grid}>
 
           {/* TRACK ME */}
-          <TouchableOpacity
-            style={styles.card}
-            activeOpacity={0.9}
-            onPress={() => {
-              if (!shiftActive) {
-                Alert.alert("Shift Inactive", "Start shift to enable live tracking.");
-                return;
-              }
-              setShowTracking(!showTracking);
-            }}
-          >
-            <MaterialIcons name="location-on" size={28} color="#60A5FA" />
-            <Text style={styles.cardTitle}>Track Me</Text>
+         <View style={styles.mapCard}>
 
-            {!shiftActive ? (
-              <Text style={styles.cardSubtitle}>Start shift to enable tracking</Text>
-            ) : showTracking ? (
-              <View style={styles.trackingContainer}>
-                <Text style={styles.trackingText}>
-                  Latitude: {location ? location.latitude.toFixed(5) : "--"}
-                </Text>
-                <Text style={styles.trackingText}>
-                  Longitude: {location ? location.longitude.toFixed(5) : "--"}
-                </Text>
-                <Text style={styles.trackingText}>
-                  Speed: {currentSpeed} km/h
-                </Text>
-                <Text style={styles.trackingActive}>Tracking Active</Text>
-              </View>
-            ) : (
-              <Text style={styles.cardSubtitle}>Tap to view live GPS</Text>
-            )}
-          </TouchableOpacity>
+  <Text style={styles.mapTitle}>
+    Live Worker Location
+  </Text>
+
+  {location ? (
+
+    <MapView
+      style={styles.map}
+      showsUserLocation
+      followsUserLocation
+      initialRegion={{
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }}
+      region={{
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }}
+    >
+
+      <Marker
+        coordinate={{
+          latitude: location.latitude,
+          longitude: location.longitude,
+        }}
+      />
+
+    </MapView>
+
+  ) : (
+
+    <Text style={styles.cardSubtitle}>
+      Waiting for GPS...
+    </Text>
+
+  )}
+
+</View>
 
           {/* SAFE ROUTES */}
           <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={openSafeRoutes}>
@@ -1026,6 +984,40 @@ notificationHeader: {
   justifyContent: "space-between",
   alignItems: "center",
   marginBottom: 14,
+},
+
+warningBanner: {
+  backgroundColor: "#DC2626",
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  alignItems: "center",
+},
+
+warningText: {
+  color: "#FFFFFF",
+  fontSize: 16,
+  fontWeight: "700",
+},
+
+mapCard: {
+  backgroundColor: "rgba(15,23,42,0.95)",
+  borderRadius: 24,
+  overflow: "hidden",
+  marginBottom: 24,
+  borderWidth: 1,
+  borderColor: "rgba(148,163,184,0.06)",
+},
+
+mapTitle: {
+  color: "#FFFFFF",
+  fontSize: 18,
+  fontWeight: "700",
+  padding: 18,
+},
+
+map: {
+  width: "100%",
+  height: 300,
 },
 
 });

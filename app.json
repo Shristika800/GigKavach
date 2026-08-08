@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "GigKavach",
-    "slug": "GigKavach",
+    "slug": "gigkavach",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,14 +23,24 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyA7AkAHwB9Ue79gbAlh372bWwTJJTEf6ss"
+        }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/icon.png"
     },
+    "owner": "shristikarai86",
     "extra": {
       "eas": {
-        "projectId": "6e9faaf5-d0ad-4e56-ac9a-d55353dd61f1"
+    "projectId": "bd1ede91-3469-4357-9c17-378804a3c434"
       }
     }
   }
