@@ -10,6 +10,9 @@ import PermissionScreen from "../screens/PermissionScreen";
 import WorkerDetailsScreen from "../screens/WorkerDetailsScreen";
 import DashboardScreen from "../screens/DashboardScreen";
 import EmergencyContactScreen from "../screens/EmergencyContactScreen";
+import DestinationScreen from "../screens/DestinationScreen";
+import RouteScreen from "../screens/RouteScreen";
+
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -58,6 +61,16 @@ export default function AppNavigator() {
           name="Dashboard"
           component={DashboardScreen}
         />
+
+        <Stack.Screen
+  name="Destination"
+  component={DestinationScreen}
+/>
+
+<Stack.Screen
+  name="RouteScreen"
+  component={RouteScreen}
+/>
 
 
       </Stack.Navigator>

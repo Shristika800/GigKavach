@@ -256,8 +256,7 @@ const openEmergencyContacts = () => {Alert.alert(
 
 };
 
-  const openSafeRoutes = () => {Linking.openURL("https://www.google.com/maps");
-  };
+const openSafeRoutes = () => {navigation.navigate("Destination");};
 
   const hour = new Date().getHours();
   let greeting = "Good Evening";

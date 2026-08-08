@@ -59,7 +59,7 @@ export default function RouteScreen({ route, navigation }: any) {
       </Text>
 
       <Text style={styles.destination}>
-        {destination}
+        {destination.name}
       </Text>
 
       {/* ================= MAP ================= */}
@@ -67,11 +67,11 @@ export default function RouteScreen({ route, navigation }: any) {
       <View style={styles.mapContainer}>
 <RoadMap
   destination={{
-    latitude: 28.6315,
-    longitude: 77.2167,
-    name: destination,
+    latitude: destination.latitude,
+    longitude: destination.longitude,
+    name: destination.name,
   }}
-/>      </View>
+/>    </View>
 
       {/* ============== ROUTES ================= */}
 

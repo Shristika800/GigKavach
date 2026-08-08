@@ -88,44 +88,49 @@ const isValidEmail =  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
         {/* BUTTON */}
 
-        <TouchableOpacity
-          activeOpacity={0.9}
-          disabled={!isValidEmail}
-          style={[
-            styles.button,
+       <TouchableOpacity
+  activeOpacity={0.9}
+  disabled={!isValidEmail}
+  style={[
+    styles.button,
+    !isValidEmail && {
+      opacity: 0.45,
+    },
+  ]}
+  onPress={async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false,
+        },
+      });
 
-            !isValidEmail && {
-              opacity: 0.45,
-            },
-          ]}
-         onPress={async () => {
+      if (error) {
+        Alert.alert("Error", error.message);
+        return;
+      }
 
-try { const { error } = await supabase.auth.signInWithOtp({
-  email,
-  options: {shouldCreateUser: true,
-    emailRedirectTo: undefined,
-  },
-});
+      Alert.alert(
+        "Check your email",
+        "We've sent you a verification code."
+      );
 
-  if (error) { Alert.alert("Error", error.message);
-    return;
-  }
-
-  Alert.alert(
-    "Check your email",
-    "We've sent you a verification code."
-  );
-
-  navigation.navigate("OTP", { email,
-  });
-} catch (err) {  Alert.alert("Error", "Something went wrong.");
-}
-}}
-        >
-
-          <Text style={styles.buttonText}>  Continue </Text>
-
-        </TouchableOpacity>
+      navigation.navigate("OTP", {
+        email,
+      });
+    } catch (err) {
+      Alert.alert(
+        "Error",
+        "Something went wrong."
+      );
+    }
+  }}
+>
+  <Text style={styles.buttonText}>
+    Continue
+  </Text>
+</TouchableOpacity>
 
         {/* REGISTER */}
 
