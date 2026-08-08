@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import SplashScreen from "../screens/SplashScreen";
-import LoginScreen from "../screens/LoginScreen";
+import LoginScreen from "../screens/AuthScreen";
 import OTPScreen from "../screens/OTPScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import PermissionScreen from "../screens/PermissionScreen";
@@ -41,7 +41,7 @@ export default function AppNavigator() {
         />
 
         <Stack.Screen
-          name="Permission"
+          name="Permissions"
           component={PermissionScreen}
         />
 

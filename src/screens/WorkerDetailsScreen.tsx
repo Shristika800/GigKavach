@@ -1,44 +1,28 @@
+import React, { useState,} from "react";
 
-import React, {
-  useState,
-} from "react";
+import {View,Text,StyleSheet, ScrollView,TouchableOpacity,TextInput, Alert, Image,} from "react-native";
 
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  Image,
-} from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
-import * as ImagePicker
-from "expo-image-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-import DateTimePicker
-from "@react-native-community/datetimepicker";
+import { supabase } from "../lib/supabase";
 
-import { supabase }
-from "../lib/supabase";
-
-import { COLORS }
-from "../constants/colors";
+import { COLORS } from "../constants/colors";
 
 export default function WorkerDetailsScreen({
   navigation,
   route,
 }: any) {
 
-  
+
 
   const {
-    phone,
+    email,
     fullName,
   } = route.params || {};
 
-  
+
 
   const [
     dlNumber,
@@ -48,6 +32,16 @@ export default function WorkerDetailsScreen({
   const [
     aadhaar,
     setAadhaar,
+  ] = useState("");
+
+  const [
+    workerType,
+    setWorkerType,
+  ] = useState("");
+
+  const [
+    vehicleType,
+    setVehicleType,
   ] = useState("");
 
   const [
@@ -68,6 +62,11 @@ export default function WorkerDetailsScreen({
     aadhaarImage,
     setAadhaarImage,
   ] = useState<any>(null);
+
+  const [
+    saving,
+    setSaving,
+  ] = useState(false);
 
   /* Date Picker */
 
@@ -241,51 +240,87 @@ if (age < 18) {
   return;
 }
 
+      if (saving) return;
+
+      setSaving(true);
 
       try {
 
-      const {
-  data,
-  error,
-} = await supabase
-  .from("users")
-  .insert([
-    {
-      full_name:
-        fullName || "Unnamed User",
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      phone,
-
-      dob,
-
-      dl_number:
-        dlNumber,
-
-      aadhaar,
-    },
-  ])
-  .select()
-  .single();
-
-        if (error) {
+        if (!user) {
 
           Alert.alert(
-            "Registration Failed",
-            error.message
+            "Session Error",
+            "Please log in again."
           );
+
+          setSaving(false);
 
           return;
         }
 
-     navigation.navigate(
-  "EmergencyContact",
-  {
-    userId: data.uuid,
-    phone,
-  }
-);
+        /* backfill dob (and email/name if missing) on users row */
+
+        const { error: userUpdateError } = await supabase
+          .from("users")
+          .update({
+            dob,
+            full_name: fullName || undefined,
+            email: email || undefined,
+          })
+          .eq("uuid", user.id);
+
+        if (userUpdateError) {
+
+          Alert.alert(
+            "Registration Failed",
+            userUpdateError.message
+          );
+
+          setSaving(false);
+
+          return;
+        }
+
+        /* insert/update workers row */
+
+        const { error: workerError } = await supabase
+          .from("workers")
+          .upsert({
+            user_id: user.id,
+            dl_number: dlNumber,
+            aadhaar,
+            worker_type: workerType || null,
+            vehicle_type: vehicleType || null,
+          });
+
+        if (workerError) {
+
+          Alert.alert(
+            "Registration Failed",
+            workerError.message
+          );
+
+          setSaving(false);
+
+          return;
+        }
+
+        setSaving(false);
+
+        navigation.navigate(
+          "EmergencyContact",
+          {
+            userId: user.id,
+          }
+        );
 
       } catch {
+
+        setSaving(false);
 
         Alert.alert(
           "Error",
@@ -320,7 +355,7 @@ if (age < 18) {
           </Text>
 
           <Text style={styles.phone}>
-            +91 {phone}
+            {email}
           </Text>
 
           
@@ -412,6 +447,34 @@ if (age < 18) {
               />
             )}
 
+            {/* WORKER TYPE */}
+
+            <Text style={styles.label}>
+              Worker Type
+            </Text>
+
+            <TextInput
+              placeholder="e.g. Delivery, Cab Driver"
+              placeholderTextColor="#64748B"
+              value={workerType}
+              onChangeText={setWorkerType}
+              style={styles.input}
+            />
+
+            {/* VEHICLE TYPE */}
+
+            <Text style={styles.label}>
+              Vehicle Type
+            </Text>
+
+            <TextInput
+              placeholder="e.g. Bike, Car, Auto"
+              placeholderTextColor="#64748B"
+              value={vehicleType}
+              onChangeText={setVehicleType}
+              style={styles.input}
+            />
+
             {/* DOB */}
 
             <Text style={styles.label}>
@@ -468,12 +531,16 @@ if (age < 18) {
       <View style={styles.bottomBar}>
 
         <TouchableOpacity
-          style={styles.button}
+          style={[
+            styles.button,
+            saving && { opacity: 0.6 },
+          ]}
           onPress={saveWorker}
+          disabled={saving}
         >
 
           <Text style={styles.buttonText}>
-            Complete Setup
+            {saving ? "Saving..." : "Complete Setup"}
           </Text>
 
         </TouchableOpacity>
@@ -608,4 +675,3 @@ const styles =
       fontWeight: "800",
     },
   });
-

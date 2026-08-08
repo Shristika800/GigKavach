@@ -1,20 +1,14 @@
-import React, {
-  useEffect,
-  useRef,
-} from "react";
+import React, {useEffect,useRef,} from "react";
 
 import {View, Text,  StyleSheet,  StatusBar,  Animated, Image,  Easing} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-import { COLORS }
-from "../constants/colors";
+import { COLORS } from "../constants/colors";
 
 import { supabase } from "../lib/supabase";
 
-export default function SplashScreen({
-  navigation,
-}: any) {
+export default function SplashScreen({ navigation,}: any) {
 
   const scaleAnim =
     useRef(
@@ -155,33 +149,24 @@ export default function SplashScreen({
 
         {/* APP NAME */}
 
-        <Text style={styles.appName}>
-GigKavach
-</Text>
+        <Text style={styles.appName}>GigKavach</Text>
 
         {/* TAGLINE */}
 
-        <Text style={styles.tagline}>
-          YOUR PROTECTION IS
-           </Text>
-          <Text style={styles.taglineAccent}>
-          OUR PRIORITY.
-       </Text>
+        <Text style={styles.tagline}> YOUR PROTECTION IS </Text>
+          <Text style={styles.taglineAccent}>OUR PRIORITY. </Text>
 
       </Animated.View>
 
       {/* FOOTER */}
 
-      <Text style={styles.footer}>
-        Initializing secure systems...
-      </Text>
+      <Text style={styles.footer}> Initializing secure systems... </Text>
 
     </View>
   );
 }
 
-const styles =
-  StyleSheet.create({
+const styles = StyleSheet.create({
 
     container: {
       flex: 1,

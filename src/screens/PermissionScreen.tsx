@@ -1,7 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect,useState,} from "react";
 
 import {View,Text,StyleSheet, StatusBar,  TouchableOpacity, ScrollView, Alert} from "react-native";
 
@@ -17,10 +14,7 @@ import { Audio } from "expo-av";
 
 import { COLORS } from "../constants/colors";
 
-export default function PermissionScreen({
-  navigation,
-  route,
-}: any)
+export default function PermissionScreen({navigation, route}: any)
  {
 
   const [
@@ -37,11 +31,7 @@ export default function PermissionScreen({
 
   /* CHECK EXISTING PERMISSIONS */
 
-  useEffect(() => {
-
-    checkPermissions();
-
-  }, []);
+  useEffect(() => {  checkPermissions();}, []);
 
   const checkPermissions =
     async () => {
@@ -92,17 +82,14 @@ export default function PermissionScreen({
 
   /* LOCATION */
 
-  const requestLocation =
-    async () => {
+  const requestLocation = 
+   async () => {
 
       const result =
         await Location
           .requestForegroundPermissionsAsync();
 
-      if (
-        result.status
-        !== "granted"
-      ) {
+      if (result.status !== "granted" ) {
 
         Alert.alert(
           "Location Required",
@@ -116,7 +103,7 @@ export default function PermissionScreen({
   /* MICROPHONE */
 
   const requestMicrophone =
-    async () => {
+async () => {
 
       await Audio
         .requestPermissionsAsync();
@@ -151,8 +138,7 @@ export default function PermissionScreen({
   const requestContacts =
     async () => {
 
-      await Contacts
-        .requestPermissionsAsync();
+      await Contacts.requestPermissionsAsync();
 
       checkPermissions();
     };
@@ -211,11 +197,10 @@ export default function PermissionScreen({
     }
 
     navigation.replace(
-      "WorkerDetails",
+      "Dashboard",
       {
-        phone: route.params?.phone,
+            userId: route.params?.userId,
 
-        fullName: route.params?.fullName,
       }
     );
   };
@@ -243,9 +228,7 @@ export default function PermissionScreen({
 
         {/* TITLE */}
 
-        <Text style={styles.title}>
-          Enable Protection
-        </Text>
+        <Text style={styles.title}>Enable Protection</Text>
 
         <Text style={styles.subtitle}>
           GigKavach uses passive
@@ -328,19 +311,13 @@ export default function PermissionScreen({
           }
         >
 
-          <Text style={styles.buttonText}>
-            Continue
-          </Text>
+          <Text style={styles.buttonText}>Continue</Text>
 
         </TouchableOpacity>
 
         {/* NOTE */}
 
-        <Text style={styles.note}>
-          Permissions can be updated
-          anytime later from device
-          settings.
-        </Text>
+        <Text style={styles.note}> Permissions can be updated anytime later from device settings. </Text>
 
       </View>
 
@@ -360,23 +337,16 @@ function PermissionCard({
 
   return (
 
-    <TouchableOpacity
-      activeOpacity={0.9}
-      style={styles.card}
-      onPress={onPress}
+    <TouchableOpacity activeOpacity={0.9} style={styles.card} onPress={onPress}
     >
 
       <View style={styles.cardTop}>
 
         <View style={styles.textArea}>
 
-          <Text style={styles.cardTitle}>
-            {title}
-          </Text>
+          <Text style={styles.cardTitle}> {title} </Text>
 
-          <Text style={styles.cardSubtitle}>
-            {subtitle}
-          </Text>
+          <Text style={styles.cardSubtitle}> {subtitle} </Text>
 
         </View>
 
@@ -414,8 +384,7 @@ function PermissionCard({
   );
 }
 
-const styles =
-  StyleSheet.create({
+const styles = StyleSheet.create({
 
     container: {
       flex: 1,
